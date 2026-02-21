@@ -25,10 +25,10 @@ export interface ShopifyProduct {
   }
 }
 
-const SHOPIFY_DOMAIN = 'excaliburstore-2.myshopify.com'
+const SHOPIFY_DOMAIN = (import.meta as any).env.VITE_SHOPIFY_STORE_DOMAIN || 'excaliburstore-2.myshopify.com';
 const SHOPIFY_TOKEN = (import.meta as any).env.VITE_SHOPIFY_STOREFRONT_TOKEN;
 
-const ENDPOINT = `https://${SHOPIFY_DOMAIN}/admin/api/2024-10/graphql.json`
+const ENDPOINT = `https://${SHOPIFY_DOMAIN}/api/2026-01/graphql.json`
 
 async function shopifyFetch(query: string, variables: Record<string, any> = {}) {
   if (!SHOPIFY_TOKEN) {
