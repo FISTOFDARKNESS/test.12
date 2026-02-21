@@ -26,9 +26,9 @@ export interface ShopifyProduct {
 }
 
 const SHOPIFY_DOMAIN = (import.meta as any).env.VITE_SHOPIFY_STORE_DOMAIN || 'excaliburstore-2.myshopify.com';
-const SHOPIFY_TOKEN = (import.meta as any).env.VITE_SHOPIFY_STOREFRONT_TOKEN;
+const SHOPIFY_TOKEN = (import.meta as any).env.VITE_SHOPIFY_STOREFRONT_TOKEN || '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';
 
-const ENDPOINT = `https://${SHOPIFY_DOMAIN}/api/2026-01/graphql.json`
+const ENDPOINT = `https://${SHOPIFY_DOMAIN}/admin/api/2026-01/graphql.json`
 
 async function shopifyFetch(query: string, variables: Record<string, any> = {}) {
   if (!SHOPIFY_TOKEN) {
