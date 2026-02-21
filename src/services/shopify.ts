@@ -26,11 +26,10 @@ export interface ShopifyProduct {
   };
 }
 
-const SHOPIFY_DOMAIN = (import.meta as any).env.VITE_SHOPIFY_STORE_DOMAIN;
 const SHOPIFY_TOKEN = (import.meta as any).env.VITE_SHOPIFY_STOREFRONT_TOKEN;
 
 async function shopifyFetch(query: string, variables = {}) {
-  const endpoint = `https://${SHOPIFY_DOMAIN}/admin/api/2026-01/graphql.json`;
+  const endpoint = `https://excaliburstore-2.myshopify.com/admin/api/2026-01/graphql.json`;
 
   const response = await fetch(endpoint, {
     method: 'POST',
