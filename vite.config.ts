@@ -9,6 +9,8 @@ export default defineConfig(({mode}) => {
     plugins: [react(), tailwindcss()],
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+      'process.env.VITE_SHOPIFY_STORE_DOMAIN': JSON.stringify(env.VITE_SHOPIFY_STORE_DOMAIN),
+      'process.env.VITE_SHOPIFY_STOREFRONT_TOKEN': JSON.stringify(env.VITE_SHOPIFY_STOREFRONT_TOKEN),
     },
     resolve: {
       alias: {

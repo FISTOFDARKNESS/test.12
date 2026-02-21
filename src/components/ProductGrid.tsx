@@ -14,7 +14,7 @@ export function ProductGrid() {
         const data = await getProducts();
         setProducts(data);
       } catch (err: any) {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : String(err));
       } finally {
         setLoading(false);
       }

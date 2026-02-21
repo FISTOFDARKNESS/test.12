@@ -1,61 +1,72 @@
-
 export interface ShopifyProduct {
-  id: string;
-  title: string;
-  handle: string;
-  description: string;
+  id: string
+  title: string
+  handle: string
+  description: string
   images: {
     edges: {
       node: {
-        url: string;
-        altText: string;
-      };
-    }[];
-  };
+        url: string
+        altText: string
+      }
+    }[]
+  }
   variants: {
     edges: {
       node: {
-        id: string;
-        title: string;
+        id: string
+        title: string
         price: {
-          amount: string;
-          currencyCode: string;
-        };
-      };
-    }[];
-  };
+          amount: string
+          currencyCode: string
+        }
+      }
+    }[]
+  }
 }
 
+const SHOPIFY_DOMAIN = 'excaliburstore-2.myshopify.com'
 const SHOPIFY_TOKEN = (import.meta as any).env.VITE_SHOPIFY_STOREFRONT_TOKEN;
 
-async function shopifyFetch(query: string, variables = {}) {
-  const endpoint = `https://excaliburstore-2.myshopify.com/admin/api/2026-01/graphql.json`;
+const ENDPOINT = `https://${SHOPIFY_DOMAIN}/api/2024-10/graphql.json`
 
-  const response = await fetch(endpoint, {
+async function shopifyFetch(query: string, variables: Record<string, any> = {}) {
+  if (!SHOPIFY_TOKEN) {
+    throw new Error('Shopify Storefront Token is missing. Please set VITE_SHOPIFY_STOREFRONT_TOKEN in your environment variables.');
+  }
+
+  const response = await fetch(ENDPOINT, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': SHOPIFY_TOKEN,
+      'X-Shopify-Storefront-Access-Token': SHOPIFY_TOKEN
     },
-    body: JSON.stringify({ query, variables }),
-  });
+    body: JSON.stringify({ query, variables })
+  })
 
-  if (!response.ok) {
-    throw new Error(`Shopify API error: ${response.statusText}`);
-  }
+  const json = await response.json()
 
-  const json = await response.json();
-  if (json.errors) {
+  if (!response.ok || json.errors) {
+    const isUnauthorized = json.errors?.some((e: any) => e.extensions?.code === 'UNAUTHORIZED');
+    
+    if (isUnauthorized) {
+      throw new Error('Unauthorized: Your Shopify Storefront Token is invalid or does not have access to this store. Please check your credentials.');
+    }
+
+    const errorMessage = json.errors 
+      ? json.errors.map((e: any) => e.message || 'Unknown GraphQL error').join(', ') 
+      : `Shopify API error: ${response.statusText}`;
+    
     console.error('Shopify GraphQL Errors:', json.errors);
-    throw new Error(json.errors[0].message);
+    throw new Error(errorMessage);
   }
 
-  return json.data;
+  return json.data
 }
 
-export const getProducts = async () => {
+export const getProducts = async (): Promise<ShopifyProduct[]> => {
   const query = `
-    query getProducts {
+    query {
       products(first: 20) {
         edges {
           node {
@@ -75,6 +86,7 @@ export const getProducts = async () => {
               edges {
                 node {
                   id
+                  title
                   price {
                     amount
                     currencyCode
@@ -86,14 +98,17 @@ export const getProducts = async () => {
         }
       }
     }
-  `;
-  const data = await shopifyFetch(query);
-  return data.products.edges.map((edge: any) => edge.node);
-};
+  `
 
-export const getProductByHandle = async (handle: string) => {
+  const data = await shopifyFetch(query)
+  return data.products.edges.map((edge: any) => edge.node)
+}
+
+export const getProductByHandle = async (
+  handle: string
+): Promise<ShopifyProduct | null> => {
   const query = `
-    query getProduct($handle: String!) {
+    query ($handle: String!) {
       product(handle: $handle) {
         id
         title
@@ -121,7 +136,8 @@ export const getProductByHandle = async (handle: string) => {
         }
       }
     }
-  `;
-  const data = await shopifyFetch(query, { handle });
-  return data.product;
-};
+  `
+
+  const data = await shopifyFetch(query, { handle })
+  return data.product
+}
